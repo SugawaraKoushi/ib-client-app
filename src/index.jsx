@@ -1,9 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router";
-import Root from "./Root";
-import Lab1 from "./Lab1";
+import axios from "axios";
+import Root from "./components/Root";
+import Lab1 from "./components/Lab1";
+import "./index.css";
+
+axios.defaults.baseURL = "http://localhost:8080/api";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
