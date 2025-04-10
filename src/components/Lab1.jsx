@@ -26,14 +26,46 @@ const Lab1 = () => {
         try {
             setLoading(true);
             const values = await form.validateFields();
-            let url = "/lab1/encode";
+            let url = "/lab1/encrypt";
 
             switch (values.algorithm) {
                 case 1:
                     url = url.concat("/additive");
                     break;
                 case 2:
-                    url.concat("/multi");
+                    url = url.concat("/multiplicative");
+                    break;
+                case 3:
+                    url = url.concat("/playfair");
+                    break;
+                default:
+                    break;
+            }
+
+            const response = await axios.post(url, {
+                text: values.text,
+                shift: values.shift,
+            });
+
+            form.setFieldValue("result", response.data);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDecrypt = async () => {
+        try {
+            setLoading(true);
+            const values = await form.validateFields();
+            let url = "/lab1/decrypt";
+            switch (values.algorithm) {
+                case 1:
+                    url = url.concat("/additive");
+                    break;
+                case 2:
+                    url = url.concat("/multiplicative");
                     break;
                 case 3:
                     url = url.concat("/playfair");
@@ -104,6 +136,7 @@ const Lab1 = () => {
                             variant="solid"
                             icon={<UnlockOutlined />}
                             loading={loading}
+                            onClick={handleDecrypt}
                         >
                             Дешифровать
                         </Button>
