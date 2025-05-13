@@ -45,6 +45,7 @@ const Lab1 = () => {
             const response = await axios.post(url, {
                 text: values.text,
                 shift: values.shift,
+                key: values.key,
             });
 
             form.setFieldValue("result", response.data);
@@ -77,6 +78,7 @@ const Lab1 = () => {
             const response = await axios.post(url, {
                 text: values.text,
                 shift: values.shift,
+                key: values.key,
             });
 
             form.setFieldValue("result", response.data);
@@ -102,23 +104,29 @@ const Lab1 = () => {
                             onChange={handleSelectAlgorithmChange}
                         />
                     </Form.Item>
-                    <Form.Item
-                        name="shift"
-                        label="Смещение"
-                        rules={[
-                            {
-                                required: algorithm !== 3,
-                                message: "Обязательное поле",
-                            },
-                        ]}
-                    >
-                        <InputNumber
-                            style={{ width: "200px" }}
-                            disabled={algorithm > 2}
-                            min={0}
-                            changeOnWheel
-                        />
-                    </Form.Item>
+                    {algorithm !== 3 && (
+                        <Form.Item
+                            name="shift"
+                            label="Смещение"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Обязательное поле",
+                                },
+                            ]}
+                        >
+                            <InputNumber
+                                style={{ width: "200px" }}
+                                min={0}
+                                changeOnWheel
+                            />
+                        </Form.Item>
+                    )}
+                    {algorithm === 3 && (
+                        <Form.Item name="key" label="Ключевое слово">
+                            <Input style={{ width: "200px" }} />
+                        </Form.Item>
+                    )}
                     <Form.Item>
                         <Button
                             color="primary"
