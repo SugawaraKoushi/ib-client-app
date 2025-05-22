@@ -1,6 +1,19 @@
-import { Button, Flex, Form, Input, InputNumber, Select, Space } from "antd";
+import {
+    Button,
+    Flex,
+    Form,
+    Input,
+    InputNumber,
+    Select,
+    Space,
+    Table,
+} from "antd";
 import { useState } from "react";
-import { LockOutlined, UnlockOutlined } from "@ant-design/icons";
+import {
+    LockOutlined,
+    SearchOutlined,
+    UnlockOutlined,
+} from "@ant-design/icons";
 import "./index.css";
 import { useForm } from "antd/es/form/Form";
 import axios from "axios";
@@ -11,6 +24,7 @@ const Lab1 = () => {
     const [form] = useForm();
     const [algorithm, setAlgorithm] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [frequencyData, setFrequencyData] = useState([]);
 
     const algorithms = [
         { value: 1, label: "Аддитивный" },
@@ -89,6 +103,65 @@ const Lab1 = () => {
         }
     };
 
+    const alphabetValidate = (_, value) => {
+        if (!value) {
+            return Promise.reject(new Error("Поле должно быть заполнено"));
+        }
+
+        const regex = /^[А-Яа-яЁё_.,]+$/;
+
+        if (!regex.test(value)) {
+            return Promise.reject(new Error("Недопустимый символ алфавита"));
+        }
+
+        return Promise.resolve();
+    };
+
+    const handleCalculateFrequencyAnalysis = async () => {
+        try {
+            setLoading(true);
+            const values = await form.validateFields();
+            let url = "/lab1/freq-analysis/calculate";
+            const response = await axios.get(url, {
+                params: {
+                    text: values.result,
+                },
+            });
+
+            const symbols = response.data;
+            const data = Object.entries(symbols).map(
+                ([symbol, frequency], index) => ({
+                    key: index + 1,
+                    symbol,
+                    frequency,
+                })
+            );
+
+            setFrequencyData(data);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const columns = [
+        {
+            title: "Символ",
+            dataIndex: "symbol",
+            key: "symbol",
+            width: "50%",
+        },
+        {
+            title: "Частота повторений",
+            dataIndex: "frequency",
+            key: "frequency",
+            defaultSortOrder: "descend",
+            sorter: (a, b) => a.frequency - b.frequency,
+            width: "50%",
+        },
+    ];
+
     return (
         <Form form={form} name="lab1" style={{ width: "100%" }}>
             <Flex style={{ width: "100%" }}>
@@ -152,13 +225,31 @@ const Lab1 = () => {
                 </Space>
             </Flex>
             <Flex gap="small" style={{ minWidth: "100%" }}>
-                <Form.Item name="text" style={{ width: "50%" }}>
+                <Form.Item
+                    name="text"
+                    style={{ width: "50%" }}
+                    rules={[{ validator: alphabetValidate }]}
+                >
                     <TextArea placeholder="Введите текст" rows={10} />
                 </Form.Item>
                 <Form.Item name="result" style={{ width: "50%" }}>
                     <TextArea placeholder="Результат" rows={10} readOnly />
                 </Form.Item>
             </Flex>
+            <Flex>
+                <Form.Item>
+                    <Button
+                        color="primary"
+                        variant="solid"
+                        icon={<SearchOutlined />}
+                        loading={loading}
+                        onClick={handleCalculateFrequencyAnalysis}
+                    >
+                        Частотный анализ
+                    </Button>
+                </Form.Item>
+            </Flex>
+            <Table dataSource={frequencyData} columns={columns} size="small" pagination={{ pageSize: 99, hideOnSinglePage: true}} />
         </Form>
     );
 };
