@@ -7,9 +7,13 @@ const Root = () => {
 
     const items = [
         {
-            key: "/characters/list",
+            key: "/lab1",
             label: <Link to="/lab1">Лаб №1</Link>,
         },
+        {
+            key: "/lab2",
+            label: <Link to="/lab2">Лаб №2</Link>,
+        }
     ];
 
     return (
