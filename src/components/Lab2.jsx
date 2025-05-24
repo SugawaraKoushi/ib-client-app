@@ -20,13 +20,14 @@ import axios from "axios";
 
 const Lab2 = () => {
     const { TextArea } = Input;
-
     const [form] = useForm();
     const [algorithm, setAlgorithm] = useState(1);
     const [loading, setLoading] = useState(false);
-    const [frequencyData, setFrequencyData] = useState([]);
 
-    const algorithms = [{ value: 1, label: "Без ключа" }];
+    const algorithms = [
+        { value: 1, label: "Без ключа" },
+        { value: 2, label: "С ключом" },
+    ];
 
     const handleSelectAlgorithmChange = (value) => {
         setAlgorithm(value);
@@ -42,11 +43,17 @@ const Lab2 = () => {
                 case 1:
                     url = url.concat("/rail-fence");
                     break;
+                case 2:
+                    url = url.concat("/with-key");
+                    break;
                 default:
                     break;
             }
 
-            const response = await axios.post(url, { text: values.text });
+            const response = await axios.post(url, {
+                text: values.text,
+                key: values.key,
+            });
 
             form.setFieldValue("result", response.data);
         } catch (error) {
@@ -65,11 +72,17 @@ const Lab2 = () => {
                 case 1:
                     url = url.concat("/rail-fence");
                     break;
+                case 2:
+                    url = url.concat("/with-key");
+                    break;
                 default:
                     break;
             }
 
-            const response = await axios.post(url, { text: values.text });
+            const response = await axios.post(url, {
+                text: values.text,
+                key: values.key,
+            });
 
             form.setFieldValue("result", response.data);
         } catch (error) {
@@ -81,13 +94,27 @@ const Lab2 = () => {
 
     const alphabetValidate = (_, value) => {
         if (!value) {
-            return Promise.reject(new Error("Поле должно быть заполнено"));
+            return Promise.reject(new Error("Обязательное поле"));
         }
 
         const regex = /^[А-Яа-яЁё_.,]+$/;
 
         if (!regex.test(value)) {
             return Promise.reject(new Error("Недопустимый символ алфавита"));
+        }
+
+        return Promise.resolve();
+    };
+
+    const keyValidate = (_, value) => {
+        if (!value) {
+            return Promise.reject(new Error("Обязательное поле"));
+        }
+
+        const regex = /^[\d]+$/;
+
+        if (!regex.test(value)) {
+            return Promise.reject(new Error("Ключ должен состоять из цифр"));
         }
 
         return Promise.resolve();
@@ -108,29 +135,15 @@ const Lab2 = () => {
                             onChange={handleSelectAlgorithmChange}
                         />
                     </Form.Item>
-                    {/* {algorithm !== 5 && (
+                    {algorithm === 2 && (
                         <Form.Item
-                            name="shift"
-                            label="Смещение"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Обязательное поле",
-                                },
-                            ]}
+                            name="key"
+                            label="Ключ"
+                            rules={[{ validator: keyValidate }]}
                         >
-                            <InputNumber
-                                style={{ width: "200px" }}
-                                min={0}
-                                changeOnWheel
-                            />
-                        </Form.Item>
-                    )}
-                    {algorithm === 5 && (
-                        <Form.Item name="key" label="Ключевое слово">
                             <Input style={{ width: "200px" }} />
                         </Form.Item>
-                    )} */}
+                    )}
                     <Form.Item>
                         <Button
                             color="primary"
