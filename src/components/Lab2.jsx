@@ -66,6 +66,9 @@ const Lab2 = () => {
                 case 2:
                     url = url.concat("/with-key");
                     break;
+                case 3:
+                    url = url.concat("/combine");
+                    break;
                 default:
                     break;
             }
