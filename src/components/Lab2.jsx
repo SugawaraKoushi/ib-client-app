@@ -1,19 +1,6 @@
-import {
-    Button,
-    Flex,
-    Form,
-    Input,
-    InputNumber,
-    Select,
-    Space,
-    Table,
-} from "antd";
+import { Button, Flex, Form, Input, Select, Space } from "antd";
 import { useState } from "react";
-import {
-    LockOutlined,
-    SearchOutlined,
-    UnlockOutlined,
-} from "@ant-design/icons";
+import { LockOutlined, UnlockOutlined } from "@ant-design/icons";
 import "./index.css";
 import { useForm } from "antd/es/form/Form";
 import axios from "axios";
@@ -27,6 +14,7 @@ const Lab2 = () => {
     const algorithms = [
         { value: 1, label: "Без ключа" },
         { value: 2, label: "С ключом" },
+        { value: 3, label: "Комбинированный с ключом" },
     ];
 
     const handleSelectAlgorithmChange = (value) => {
@@ -45,6 +33,9 @@ const Lab2 = () => {
                     break;
                 case 2:
                     url = url.concat("/with-key");
+                    break;
+                case 3:
+                    url = url.concat("/combine");
                     break;
                 default:
                     break;
@@ -135,7 +126,7 @@ const Lab2 = () => {
                             onChange={handleSelectAlgorithmChange}
                         />
                     </Form.Item>
-                    {algorithm === 2 && (
+                    {algorithm !== 1 && (
                         <Form.Item
                             name="key"
                             label="Ключ"
