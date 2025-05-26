@@ -98,6 +98,12 @@ const Lab2 = () => {
             return Promise.reject(new Error("Обязательное поле"));
         }
 
+        if (value.length < 10000) {
+            return Promise.reject(
+                new Error("Длина текста должна быть не менее 10000 символов")
+            );
+        }
+
         const regex = /^[А-Яа-яЁё_.,]+$/;
 
         if (!regex.test(value)) {
@@ -184,7 +190,12 @@ const Lab2 = () => {
                     style={{ width: "50%" }}
                     rules={[{ validator: alphabetValidate }]}
                 >
-                    <TextArea placeholder="Введите текст" rows={10} />
+                    <TextArea
+                        placeholder="Введите текст"
+                        rows={10}
+                        minLength={10000}
+                        count={{ show: true, minLength: 10000 }}
+                    />
                 </Form.Item>
                 <Form.Item name="result" style={{ width: "50%" }}>
                     <TextArea placeholder="Результат" rows={10} readOnly />
