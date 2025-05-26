@@ -15,6 +15,7 @@ const Lab2 = () => {
         { value: 1, label: "Без ключа" },
         { value: 2, label: "С ключом" },
         { value: 3, label: "Комбинированный с ключом" },
+        { value: 4, label: "Двойной" },
     ];
 
     const handleSelectAlgorithmChange = (value) => {
@@ -37,13 +38,16 @@ const Lab2 = () => {
                 case 3:
                     url = url.concat("/combine");
                     break;
+                case 4:
+                    url = url.concat("/double");
+                    break;
                 default:
                     break;
             }
 
             const response = await axios.post(url, {
                 text: values.text,
-                key: values.key,
+                keys: [values.key1, values.key2],
             });
 
             form.setFieldValue("result", response.data);
@@ -69,13 +73,16 @@ const Lab2 = () => {
                 case 3:
                     url = url.concat("/combine");
                     break;
+                case 4:
+                    url = url.concat("/double");
+                    break;
                 default:
                     break;
             }
 
             const response = await axios.post(url, {
                 text: values.text,
-                key: values.key,
+                keys: [values.key1, values.key2],
             });
 
             form.setFieldValue("result", response.data);
@@ -131,7 +138,16 @@ const Lab2 = () => {
                     </Form.Item>
                     {algorithm !== 1 && (
                         <Form.Item
-                            name="key"
+                            name="key1"
+                            label="Ключ"
+                            rules={[{ validator: keyValidate }]}
+                        >
+                            <Input style={{ width: "200px" }} />
+                        </Form.Item>
+                    )}
+                    {algorithm === 4 && (
+                        <Form.Item
+                            name="key2"
                             label="Ключ"
                             rules={[{ validator: keyValidate }]}
                         >
