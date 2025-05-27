@@ -1,6 +1,10 @@
 import { Button, Flex, Form, Input, Select, Space } from "antd";
-import { useState } from "react";
-import { LockOutlined, UnlockOutlined } from "@ant-design/icons";
+import { useRef, useState } from "react";
+import {
+    LockOutlined,
+    SearchOutlined,
+    UnlockOutlined,
+} from "@ant-design/icons";
 import "./index.css";
 import { useForm } from "antd/es/form/Form";
 import axios from "axios";
@@ -10,6 +14,7 @@ const Lab2 = () => {
     const [form] = useForm();
     const [algorithm, setAlgorithm] = useState(1);
     const [loading, setLoading] = useState(false);
+    const bruteForceIteration = useRef(10);
 
     const algorithms = [
         { value: 1, label: "Без ключа" },
@@ -98,11 +103,11 @@ const Lab2 = () => {
             return Promise.reject(new Error("Обязательное поле"));
         }
 
-        if (value.length < 10000) {
-            return Promise.reject(
-                new Error("Длина текста должна быть не менее 10000 символов")
-            );
-        }
+        // if (value.length < 10000) {
+        //     return Promise.reject(
+        //         new Error("Длина текста должна быть не менее 10000 символов")
+        //     );
+        // }
 
         const regex = /^[А-Яа-яЁё_.,]+$/;
 
@@ -111,6 +116,19 @@ const Lab2 = () => {
         }
 
         return Promise.resolve();
+    };
+
+    const handleBruteForce = async () => {
+        bruteForceIteration.current += 1;
+        const url = "/lab2/brute-force/combine";
+        const values = await form.validateFields();
+        const response = await axios.post(url, {
+            text: values.text,
+            keys: [values.key1],
+        });
+
+        form.setFieldValue("key1", response.data.key);
+        form.setFieldValue("result", response.data.text);
     };
 
     const keyValidate = (_, value) => {
@@ -182,6 +200,19 @@ const Lab2 = () => {
                             Дешифровать
                         </Button>
                     </Form.Item>
+                    {algorithm === 3 && (
+                        <Form.Item>
+                            <Button
+                                color="primary"
+                                variant="solid"
+                                icon={<SearchOutlined />}
+                                loading={loading}
+                                onClick={handleBruteForce}
+                            >
+                                Подобрать ключ
+                            </Button>
+                        </Form.Item>
+                    )}
                 </Space>
             </Flex>
             <Flex gap="small" style={{ minWidth: "100%" }}>
