@@ -146,7 +146,7 @@ const Lab2 = () => {
     };
 
     return (
-        <Form form={form} name="lab1" style={{ width: "100%" }}>
+        <Form form={form} name="lab2" style={{ width: "100%" }}>
             <Flex style={{ width: "100%" }}>
                 <Space>
                     <Form.Item

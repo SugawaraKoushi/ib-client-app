@@ -1,10 +1,8 @@
 import { Flex, Layout, Menu } from "antd";
 import { Content, Header } from "antd/es/layout/layout";
-import { Link, Outlet, useNavigate } from "react-router";
+import { Link, Outlet } from "react-router";
 
 const Root = () => {
-    const navigate = useNavigate();
-
     const items = [
         {
             key: "/lab1",
@@ -13,6 +11,10 @@ const Root = () => {
         {
             key: "/lab2",
             label: <Link to="/lab2">Лаб №2</Link>,
+        },
+        {
+            key: "/lab3",
+            label: <Link to="/lab3">Лаб №3</Link>
         }
     ];
 
@@ -24,7 +26,7 @@ const Root = () => {
                     align="center"
                     justify="space-between"
                 >
-                    <Menu theme="dark" mode="horizontal" items={items} />
+                    <Menu theme="dark" mode="horizontal" items={items} disabledOverflow/>
                 </Flex>
             </Header>
             <Layout
