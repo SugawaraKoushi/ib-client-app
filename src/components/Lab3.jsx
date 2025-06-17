@@ -35,6 +35,7 @@ const Lab3 = () => {
             const response = await axios.post(url, {
                 text: values.text,
                 key: values.key,
+                keyType: values.keyType
             });
 
             form.setFieldValue("result", response.data);
@@ -54,6 +55,7 @@ const Lab3 = () => {
             const response = await axios.post(url, {
                 text: values.text,
                 key: values.key,
+                keyType: values.keyType
             });
 
             form.setFieldValue("result", response.data);
