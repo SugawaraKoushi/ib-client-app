@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import {
     LockOutlined,
     SearchOutlined,
+    SwapLeftOutlined,
     UnlockOutlined,
 } from "@ant-design/icons";
 import "./index.css";
@@ -131,6 +132,11 @@ const Lab2 = () => {
         form.setFieldValue("result", response.data.text);
     };
 
+    const handleSwapResultText = async () => {
+        const values = await form.validateFields();
+        form.setFieldValue("text", values.result);
+    };
+
     const keyValidate = (_, value) => {
         if (!value) {
             return Promise.reject(new Error("Обязательное поле"));
@@ -215,7 +221,12 @@ const Lab2 = () => {
                     )}
                 </Space>
             </Flex>
-            <Flex gap="small" style={{ minWidth: "100%" }}>
+            <Flex
+                gap="small"
+                style={{ minWidth: "100%" }}
+                align="center"
+                justify="space-between"
+            >
                 <Form.Item
                     name="text"
                     style={{ width: "50%" }}
@@ -228,6 +239,13 @@ const Lab2 = () => {
                         count={{ show: true, minLength: 10000 }}
                     />
                 </Form.Item>
+                <Button
+                    color="primary"
+                    variant="solid"
+                    loading={loading}
+                    icon={<SwapLeftOutlined />}
+                    onClick={handleSwapResultText}
+                />
                 <Form.Item name="result" style={{ width: "50%" }}>
                     <TextArea placeholder="Результат" rows={10} readOnly />
                 </Form.Item>

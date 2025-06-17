@@ -2,7 +2,7 @@ import { Button, Flex, Form, Input, Select, Space } from "antd";
 import { useRef, useState } from "react";
 import {
     LockOutlined,
-    SearchOutlined,
+    SwapLeftOutlined,
     UnlockOutlined,
 } from "@ant-design/icons";
 import "./index.css";
@@ -12,17 +12,16 @@ import axios from "axios";
 const Lab3 = () => {
     const { TextArea } = Input;
     const [form] = useForm();
-    const [algorithm, setAlgorithm] = useState(1);
+    const [keyType, setKeyType] = useState(1);
     const [loading, setLoading] = useState(false);
-    const bruteForceIteration = useRef(10);
 
     const algorithms = [
         { value: 1, label: "текст" },
         { value: 2, label: "16-ричный код" },
     ];
 
-    const handleSelectAlgorithmChange = (value) => {
-        setAlgorithm(value);
+    const handleSelectKeyType = (value) => {
+        setKeyType(value);
     };
 
     const handleEncrypt = async () => {
@@ -30,7 +29,7 @@ const Lab3 = () => {
             setLoading(true);
             const values = await form.validateFields();
             console.log(values);
-            
+
             let url = "/lab3/encrypt/aes-128";
 
             const response = await axios.post(url, {
@@ -65,19 +64,38 @@ const Lab3 = () => {
         }
     };
 
-    // const keyValidate = (_, value) => {
-    //     if (!value) {
-    //         return Promise.reject(new Error("Обязательное поле"));
-    //     }
+    const handleSwapResultText = async () => {
+        const values = await form.validateFields();
+        form.setFieldValue("text", values.result);
+    };
 
-    //     const regex = /^[\d]+$/;
+    const keyValidate = (_, value) => {
+        if (!value) {
+            return Promise.reject(new Error("Обязательное поле"));
+        }
 
-    //     if (!regex.test(value)) {
-    //         return Promise.reject(new Error("Ключ должен состоять из цифр"));
-    //     }
+        if (keyType === 1) {
+            return Promise.resolve();
+        }
 
-    //     return Promise.resolve();
-    // };
+        const regex = /^[\dA-Fa-f]+$/;
+
+        if (!regex.test(value)) {
+            return Promise.reject(
+                new Error("Ключ должен быть 16-ричным числом")
+            );
+        }
+
+        return Promise.resolve();
+    };
+
+    const inputTextValidate = (_, value) => {
+        if (!value) {
+            return Promise.reject(new Error("Обязательное поле"));
+        }
+
+        return Promise.resolve();
+    };
 
     return (
         <Form form={form} name="lab2" style={{ width: "100%" }}>
@@ -91,13 +109,13 @@ const Lab3 = () => {
                         <Select
                             style={{ width: "200px" }}
                             options={algorithms}
-                            onChange={handleSelectAlgorithmChange}
+                            onChange={handleSelectKeyType}
                         />
                     </Form.Item>
                     <Form.Item
                         name="key"
                         label="Ключ"
-                        // rules={[{ validator: keyValidate }]}
+                        rules={[{ validator: keyValidate }]}
                     >
                         <Input style={{ width: "200px" }} />
                     </Form.Item>
@@ -125,19 +143,26 @@ const Lab3 = () => {
                     </Form.Item>
                 </Space>
             </Flex>
-            <Flex gap="small" style={{ minWidth: "100%" }}>
+            <Flex
+                gap="small"
+                style={{ minWidth: "100%" }}
+                align="center"
+                justify="space-between"
+            >
                 <Form.Item
                     name="text"
                     style={{ width: "50%" }}
-                    // rules={[{ validator: alphabetValidate }]}
+                    rules={[{ validator: inputTextValidate }]}
                 >
-                    <TextArea
-                        placeholder="Введите текст"
-                        rows={10}
-                        // minLength={10000}
-                        // count={{ show: true, minLength: 10000 }}
-                    />
+                    <TextArea placeholder="Введите текст" rows={10} />
                 </Form.Item>
+                <Button
+                    color="primary"
+                    variant="solid"
+                    loading={loading}
+                    icon={<SwapLeftOutlined />}
+                    onClick={handleSwapResultText}
+                />
                 <Form.Item name="result" style={{ width: "50%" }}>
                     <TextArea placeholder="Результат" rows={10} readOnly />
                 </Form.Item>

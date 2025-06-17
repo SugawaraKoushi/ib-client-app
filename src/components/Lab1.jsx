@@ -12,6 +12,7 @@ import { useState } from "react";
 import {
     LockOutlined,
     SearchOutlined,
+    SwapLeftOutlined,
     UnlockOutlined,
 } from "@ant-design/icons";
 import "./index.css";
@@ -145,6 +146,11 @@ const Lab1 = () => {
         }
     };
 
+    const handleSwapResultText = async () => {
+        const values = await form.validateFields();
+        form.setFieldValue("text", values.result);
+    };
+
     const columns = [
         {
             title: "Символ",
@@ -224,7 +230,12 @@ const Lab1 = () => {
                     </Form.Item>
                 </Space>
             </Flex>
-            <Flex gap="small" style={{ minWidth: "100%" }}>
+            <Flex
+                gap="small"
+                style={{ minWidth: "100%" }}
+                align="center"
+                justify="space-between"
+            >
                 <Form.Item
                     name="text"
                     style={{ width: "50%" }}
@@ -232,6 +243,13 @@ const Lab1 = () => {
                 >
                     <TextArea placeholder="Введите текст" rows={10} />
                 </Form.Item>
+                <Button
+                    color="primary"
+                    variant="solid"
+                    loading={loading}
+                    icon={<SwapLeftOutlined />}
+                    onClick={handleSwapResultText}
+                />
                 <Form.Item name="result" style={{ width: "50%" }}>
                     <TextArea placeholder="Результат" rows={10} readOnly />
                 </Form.Item>
@@ -249,7 +267,12 @@ const Lab1 = () => {
                     </Button>
                 </Form.Item>
             </Flex>
-            <Table dataSource={frequencyData} columns={columns} size="small" pagination={{ pageSize: 99, hideOnSinglePage: true}} />
+            <Table
+                dataSource={frequencyData}
+                columns={columns}
+                size="small"
+                pagination={{ pageSize: 99, hideOnSinglePage: true }}
+            />
         </Form>
     );
 };
