@@ -73,7 +73,24 @@ const Lab4 = () => {
             }
 
             const response = await axios.get(url, { params });
-            form.setFieldValue("result", response.data.toString());
+            const data = response.data;
+            let text;
+
+            if (test < 4) {
+                if (data.numberType < 0) {
+                    text = `Число составное, затраченное время: ${data.seconds} сек.`;
+                } else if (data.numberType === 0) {
+                    text = `Число является числом Карлмайкла, затраченное время: ${data.seconds} сек.`;
+                } else if (data.numberType > 0 || test < 3) {
+                    text = `Число вероятно простое, затраченное время: ${data.seconds} сек.`;
+                } else {
+                    text = `Число простое, затраченное время: ${data.seconds} сек.`;
+                }
+
+                form.setFieldValue("result", text);
+            } else {
+                form.setFieldValue("result", response.data);
+            }
         } catch (error) {
             console.log(error);
         } finally {
