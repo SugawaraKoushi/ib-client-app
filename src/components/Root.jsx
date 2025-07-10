@@ -14,16 +14,20 @@ const Root = () => {
         },
         {
             key: "/lab3",
-            label: <Link to="/lab3">Лаб №3</Link>
+            label: <Link to="/lab3">Лаб №3</Link>,
         },
         {
             key: "/lab4",
-            label: <Link to="/lab4">Лаб №4</Link>
+            label: <Link to="/lab4">Лаб №4</Link>,
         },
         {
             key: "/lab5",
-            label: <Link to="/lab5">Лаб №5</Link>
-        }
+            label: <Link to="/lab5">Лаб №5</Link>,
+        },
+        {
+            key: "/lab6",
+            label: <Link to="/lab6">Лаб №6</Link>,
+        },
     ];
 
     return (
@@ -34,7 +38,12 @@ const Root = () => {
                     align="center"
                     justify="space-between"
                 >
-                    <Menu theme="dark" mode="horizontal" items={items} disabledOverflow/>
+                    <Menu
+                        theme="dark"
+                        mode="horizontal"
+                        items={items}
+                        disabledOverflow
+                    />
                 </Flex>
             </Header>
             <Layout
