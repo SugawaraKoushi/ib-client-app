@@ -14,41 +14,53 @@ import axios from "axios";
 const Lab6 = () => {
     const { TextArea } = Input;
     const [form] = useForm();
-    const [keysForm] = useForm();
+    const [rsaForm] = useForm();
+    const [aesForm] = useForm();
     const [loading, setLoading] = useState(false);
     const [publicKey, setPublicKey] = useState(null);
     const [privateKey, setPrivateKey] = useState(null);
+    const [encryptedAESKey, setEncryptedAESKey] = useState("");
 
     const handleGenerateP = async () => {
-        const bits = await keysForm.getFieldValue("pBits");
-        const url = "/lab4/prime-numbers/generate-prime-number";
+        const bits = await rsaForm.getFieldValue("pBits");
+        const url = "/lab4/prime-numbers/generate-hex-prime-number";
         const params = {
             bits: bits,
             rounds: 20,
         };
         const response = await axios.get(url, { params });
-        keysForm.setFieldValue("p", response.data);
+        rsaForm.setFieldValue("p", response.data);
     };
 
     const handleGenerateQ = async () => {
-        const bits = await keysForm.getFieldValue("qBits");
-        const url = "/lab4/prime-numbers/generate-prime-number";
+        const bits = await rsaForm.getFieldValue("qBits");
+        const url = "/lab4/prime-numbers/generate-hex-prime-number";
         const params = {
             bits: bits,
             rounds: 20,
         };
         const response = await axios.get(url, { params });
-        keysForm.setFieldValue("q", response.data);
+        rsaForm.setFieldValue("q", response.data);
     };
 
-    const decimalValidate = (_, value) => {
-        const regex = /^[\d]+$/;
+    const hexadecimalValidate = (_, value) => {
+        const regex = /^[\dA-Fa-f]+$/;
 
         if (!regex.test(value)) {
-            return Promise.reject(new Error("Введите 10-ричное число"));
+            return Promise.reject(new Error("Введите 16-ричное число"));
         }
 
         return Promise.resolve();
+    };
+
+    const handleGenerateAesKey = async () => {
+        const url = "/lab4/prime-numbers/generate-hex-prime-number";
+        const params = {
+            bits: 128,
+            rounds: 20,
+        };
+        const response = await axios.get(url, { params });
+        aesForm.setFieldValue("aesKey", response.data);
     };
 
     const handleUploadFile = async (options) => {
@@ -63,8 +75,8 @@ const Lab6 = () => {
             const response = await axios.post(url, formData);
             const data = response.data;
 
-            keysForm.setFieldValue("p", data.p);
-            keysForm.setFieldValue("q", data.q);
+            rsaForm.setFieldValue("p", data.p);
+            rsaForm.setFieldValue("q", data.q);
             onSuccess(data, file);
         } catch (error) {
             console.log(error);
@@ -76,7 +88,7 @@ const Lab6 = () => {
 
     const handleGetKeys = async () => {
         try {
-            const values = await keysForm.validateFields();
+            const values = await rsaForm.validateFields();
             const response = await axios.get("/lab6/get-keys", {
                 params: { p: values.p, q: values.q },
                 responseType: "json",
@@ -86,24 +98,27 @@ const Lab6 = () => {
             setPublicKey(response.data.publicKey);
             setPrivateKey(response.data.privateKey);
 
-            console.log(publicKey, privateKey);
-
             // Формируем zip архив для скачивания
-            const byteChars = decodeBase64(response.data.zipFile);
-            const byteArray = new Uint8Array(byteChars.length);
-            for (let i = 0; i < byteChars.length; i++) {
-                byteArray[i] = byteChars.charCodeAt(i);
-            }
-
-            const blob = new Blob([byteArray], { type: "application/zip" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = "rsa_keys.zip";
-            link.click();
+            downloadZipArhive(response.data.zipFile, "rsa_keys.zip");
         } catch (error) {
             console.error(error);
         }
+    };
+
+    const downloadZipArhive = (data, archiveName) => {
+        const byteChars = decodeBase64(data);
+        const byteArray = new Uint8Array(byteChars.length);
+
+        for (let i = 0; i < byteChars.length; i++) {
+            byteArray[i] = byteChars.charCodeAt(i);
+        }
+
+        const blob = new Blob([byteArray], { type: "application/zip" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = archiveName;
+        link.click();
     };
 
     const decodeBase64 = (base64) => {
@@ -119,39 +134,44 @@ const Lab6 = () => {
     };
 
     const handleSwapResultText = async () => {
-        const values = await form.validateFields();
-        form.setFieldValue("text", values.result);
+        const values = await aesForm.validateFields();
+        aesForm.setFieldValue("text", values.result);
     };
 
     const handleEncrypt = async () => {
         try {
             const url = "/lab6/encrypt";
-            const values = await form.validateFields();
+            const values = await aesForm.validateFields();
             const body = {
                 text: values.text,
-                key: publicKey,
+                rsaPublicKey: publicKey,
+                aesKey: values.aesKey,
             };
 
             const response = await axios.post(url, body);
-            form.setFieldValue("result", response.data);
+            aesForm.setFieldValue("result", response.data.encryptedText);
+            setEncryptedAESKey(response.data.encryptedKey);
+            downloadZipArhive(response.data.zip, "aes_encrypted.zip");
         } catch (error) {
-            console.log();
+            console.log(error);
         }
     };
 
     const handleDecrypt = async () => {
         try {
             const url = "/lab6/decrypt";
-            const values = await form.validateFields();
+            const values = await aesForm.validateFields();
             const body = {
                 text: values.text,
-                key: privateKey,
+                rsaPrivateKey: privateKey,
+                encryptedAESKey: encryptedAESKey,
             };
 
             const response = await axios.post(url, body);
-            form.setFieldValue("result", response.data);
+            aesForm.setFieldValue("result", response.data.decryptedText);
+            downloadZipArhive(response.data.zip, "aes_decrypted.zip");
         } catch (error) {
-            console.log();
+            console.log(error);
         }
     };
 
@@ -173,7 +193,7 @@ const Lab6 = () => {
             </Upload>
 
             <Flex style={{ width: "100%" }}>
-                <Form form={keysForm} name="rsaForm" style={{ width: "100%" }}>
+                <Form form={rsaForm} name="rsaForm" style={{ width: "100%" }}>
                     <Flex style={{ width: "100%" }}>
                         <Space>
                             <Flex vertical justify="center">
@@ -186,7 +206,7 @@ const Lab6 = () => {
                                             rules={[
                                                 {
                                                     validator: (_, value) =>
-                                                        decimalValidate(
+                                                        hexadecimalValidate(
                                                             _,
                                                             value
                                                         ),
@@ -228,7 +248,7 @@ const Lab6 = () => {
                                             rules={[
                                                 {
                                                     validator: (_, value) =>
-                                                        decimalValidate(
+                                                        hexadecimalValidate(
                                                             _,
                                                             value
                                                         ),
@@ -275,9 +295,36 @@ const Lab6 = () => {
                         loading={loading}
                         onClick={handleGetKeys}
                     >
-                        Получить ключи
+                        Получить RSA ключи
                     </Button>
                 </Form.Item>
+            </Form>
+            <Form form={aesForm} name="aesForm">
+                <Flex gap="small">
+                    <Form.Item
+                        style={{ width: "400px" }}
+                        name="aesKey"
+                        label="Ключ"
+                        rules={[
+                            {
+                                validator: (_, value) =>
+                                    hexadecimalValidate(_, value),
+                            },
+                        ]}
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item>
+                        <Button
+                            variant="solid"
+                            color="primary"
+                            loading={loading}
+                            onClick={handleGenerateAesKey}
+                        >
+                            Сгенертировать ключ
+                        </Button>
+                    </Form.Item>
+                </Flex>
                 <Flex gap="small">
                     <Form.Item>
                         <Button
