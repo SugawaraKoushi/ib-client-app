@@ -8,7 +8,7 @@ import {
     Space,
     Splitter,
 } from "antd";
-import { use, useState } from "react";
+import { useState } from "react";
 import { SearchOutlined, SwapLeftOutlined } from "@ant-design/icons";
 import "./index.css";
 import { useForm } from "antd/es/form/Form";
@@ -21,14 +21,18 @@ const Lab7 = () => {
     const [rsaKeyForm] = useForm();
     const [rsaSignForm] = useForm();
     const [rsaCheckSignForm] = useForm();
+    const [elgamalForm] = useForm();
+    const [elGamalSignForm] = useForm();
+
     const [algorithm, setAlgorithm] = useState(1);
     const [loading, setLoading] = useState(false);
     const [rsaKeys, setRSAKeys] = useState(null);
+    const [elGamalKeys, setElGamalKeys] = useState(null);
 
     const algorithms = [
         { value: 1, label: "SHA-256" },
         { value: 2, label: "RSA" },
-        { value: 3, label: "Эль-Гаммаль" },
+        { value: 3, label: "Эль-Гамаль" },
     ];
 
     const handleSelectAlgorithmChange = (value) => {
@@ -107,8 +111,77 @@ const Lab7 = () => {
         }
     };
 
+    const handleGenerateElGamalP = async () => {
+        const bits = await elgamalForm.getFieldValue("pBits");
+        const url = "/lab4/prime-numbers/generate-hex-prime-number";
+        const params = {
+            bits: bits,
+            rounds: 20,
+        };
+        const response = await axios.get(url, { params });
+        elgamalForm.setFieldValue("p", response.data);
+    };
+
+    const handleGetElGamalA = async () => {
+        try {
+            setLoading(true);
+            const values = await elgamalForm.validateFields();
+            const url = "/lab5/primitive-roots/get-random-root";
+            const params = {
+                value: values.p,
+            };
+            const response = await axios.get(url, { params });
+            elgamalForm.setFieldValue("a", response.data);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGetElGamalK = async () => {
+        try {
+            setLoading(true);
+            const values = await elgamalForm.validateFields();
+            const url = "/lab7/el-gamal/get-k";
+            const params = {
+                p: values.p,
+            };
+            const response = await axios.get(url, { params });
+            elgamalForm.setFieldValue("k", response.data);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGetElGamalKeys = async () => {
+        try {
+            setLoading(true);
+            const values = await elgamalForm.validateFields();
+            const url = "/lab7/el-gamal/get-keys";
+            const params = {
+                p: values.p,
+                a: values.a,
+            };
+            const response = await axios.get(url, { params });
+            const data = response.data;
+            setElGamalKeys(data);
+            console.log(data);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const hexadecimalValidate = (_, value) => {
         const regex = /^[\dA-Fa-f]+$/;
+
+        if (value == null) {
+            return Promise.resolve();
+        }
 
         if (!regex.test(value)) {
             return Promise.reject(new Error("Введите 16-ричное число"));
@@ -117,7 +190,7 @@ const Lab7 = () => {
         return Promise.resolve();
     };
 
-    const signMessage = async () => {
+    const signMessageWithRSA = async () => {
         try {
             setLoading(true);
             const values = await rsaSignForm.validateFields();
@@ -150,6 +223,32 @@ const Lab7 = () => {
 
             const response = await axios.post(url, body);
             rsaCheckSignForm.setFieldValue("hashCode", response.data);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const signMessageWithElGamal = async () => {
+        try {
+            setLoading(true);
+            const values = await elGamalSignForm.validateFields();
+            const values1 = await elgamalForm.validateFields();
+            const url = "/lab7/el-gamal/sign";
+            const body = {
+                g: values1.a,
+                k: values1.k,
+                p: values1.p,
+                x: elGamalKeys.x,
+                message: values.message,
+            };
+
+            const response = await axios.post(url, body);
+            const data = response.data;
+            elGamalSignForm.setFieldValue("hashCode", data.hashCode);
+            elGamalSignForm.setFieldValue("a", data.a);
+            elGamalSignForm.setFieldValue("b", data.b);
         } catch (error) {
             console.log(error);
         } finally {
@@ -316,7 +415,6 @@ const Lab7 = () => {
                             </Button>
                         </Form.Item>
                     </Form>
-
                     <Splitter>
                         <Splitter.Panel style={{ marginRight: "20px" }}>
                             <Form
@@ -334,7 +432,7 @@ const Lab7 = () => {
                                             variant="solid"
                                             color="primary"
                                             loading={loading}
-                                            onClick={signMessage}
+                                            onClick={signMessageWithRSA}
                                         >
                                             Подписать сообщение
                                         </Button>
@@ -387,15 +485,232 @@ const Lab7 = () => {
                                             сообщения
                                         </Button>
                                     </Form.Item>
-                                    {/* <Form.Item
-                                        name="text"
+                                    <Form.Item
                                         style={{ width: "100%" }}
+                                        name="sign"
+                                        label="Подпись"
+                                        required
+                                    >
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item
+                                        style={{ width: "100%" }}
+                                        name="hashCode"
+                                        label="Хэш"
+                                    >
+                                        <Input readOnly />
+                                    </Form.Item>
+                                </Flex>
+                            </Form>
+                        </Splitter.Panel>
+                    </Splitter>
+                </Flex>
+            )}
+            {algorithm === 3 && (
+                <Flex vertical>
+                    <Form
+                        form={elgamalForm}
+                        name="elgamalForm"
+                        style={{ width: "100%" }}
+                    >
+                        <Flex style={{ width: "100%" }}>
+                            <Space>
+                                <Flex vertical justify="center">
+                                    <Flex justify="space-between">
+                                        <Space>
+                                            <Form.Item
+                                                style={{ width: "400px" }}
+                                                name="p"
+                                                label="p"
+                                                rules={[
+                                                    {
+                                                        validator: (_, value) =>
+                                                            hexadecimalValidate(
+                                                                _,
+                                                                value
+                                                            ),
+                                                    },
+                                                ]}
+                                            >
+                                                <Input />
+                                            </Form.Item>
+                                            <Form.Item
+                                                style={{ width: "180px" }}
+                                                name="pBits"
+                                                label="Количество бит"
+                                                initialValue={128}
+                                            >
+                                                <InputNumber
+                                                    changeOnWheel
+                                                    style={{ width: "100%" }}
+                                                    min={1}
+                                                />
+                                            </Form.Item>
+                                            <Form.Item>
+                                                <Button
+                                                    variant="solid"
+                                                    color="primary"
+                                                    loading={loading}
+                                                    onClick={
+                                                        handleGenerateElGamalP
+                                                    }
+                                                >
+                                                    Сгенертировать число
+                                                </Button>
+                                            </Form.Item>
+                                        </Space>
+                                    </Flex>
+                                    <Flex justify="space-between">
+                                        <Space>
+                                            <Form.Item
+                                                style={{ width: "400px" }}
+                                                name="a"
+                                                label="a"
+                                                rules={[
+                                                    {
+                                                        validator: (_, value) =>
+                                                            hexadecimalValidate(
+                                                                _,
+                                                                value
+                                                            ),
+                                                    },
+                                                ]}
+                                            >
+                                                <Input />
+                                            </Form.Item>
+                                            <Form.Item>
+                                                <Button
+                                                    variant="solid"
+                                                    color="primary"
+                                                    loading={loading}
+                                                    onClick={handleGetElGamalA}
+                                                >
+                                                    Сгенертировать число
+                                                </Button>
+                                            </Form.Item>
+                                        </Space>
+                                    </Flex>
+                                    <Flex justify="space-between">
+                                        <Space>
+                                            <Form.Item
+                                                style={{ width: "400px" }}
+                                                name="k"
+                                                label="k"
+                                                rules={[
+                                                    {
+                                                        validator: (_, value) =>
+                                                            hexadecimalValidate(
+                                                                _,
+                                                                value
+                                                            ),
+                                                    },
+                                                ]}
+                                            >
+                                                <Input />
+                                            </Form.Item>
+                                            <Form.Item>
+                                                <Button
+                                                    variant="solid"
+                                                    color="primary"
+                                                    loading={loading}
+                                                    onClick={handleGetElGamalK}
+                                                >
+                                                    Сгенертировать число
+                                                </Button>
+                                            </Form.Item>
+                                        </Space>
+                                    </Flex>
+                                </Flex>
+                            </Space>
+                        </Flex>
+                        <Form.Item>
+                            <Button
+                                variant="solid"
+                                color="primary"
+                                loading={loading}
+                                onClick={handleGetElGamalKeys}
+                            >
+                                Получить ключи
+                            </Button>
+                        </Form.Item>
+                    </Form>
+                    <Splitter>
+                        <Splitter.Panel style={{ marginRight: "20px" }}>
+                            <Form
+                                form={elGamalSignForm}
+                                name="elGamalSignForm"
+                                style={{ width: "100%" }}
+                            >
+                                <Flex
+                                    vertical
+                                    gap="small"
+                                    style={{ width: "100%" }}
+                                >
+                                    <Form.Item
+                                        name="message"
+                                        style={{ width: "100%" }}
+                                        required
                                     >
                                         <TextArea
                                             placeholder="Введите текст"
                                             rows={10}
                                         />
-                                    </Form.Item> */}
+                                    </Form.Item>
+                                    <Form.Item>
+                                        <Button
+                                            variant="solid"
+                                            color="primary"
+                                            loading={loading}
+                                            onClick={signMessageWithElGamal}
+                                        >
+                                            Подписать сообщение
+                                        </Button>
+                                    </Form.Item>
+                                    <Form.Item
+                                        style={{ width: "100%" }}
+                                        name="hashCode"
+                                        label="Хэш"
+                                    >
+                                        <Input readOnly />
+                                    </Form.Item>
+                                    <Form.Item
+                                        style={{ width: "100%" }}
+                                        name="a"
+                                        label="Подпись a"
+                                    >
+                                        <Input readOnly />
+                                    </Form.Item>
+                                    <Form.Item
+                                        style={{ width: "100%" }}
+                                        name="b"
+                                        label="Подпись b"
+                                    >
+                                        <Input readOnly />
+                                    </Form.Item>
+                                </Flex>
+                            </Form>
+                        </Splitter.Panel>
+                        <Splitter.Panel style={{ marginLeft: "20px" }}>
+                            <Form
+                                form={rsaCheckSignForm}
+                                name="rsaCheckSignForm"
+                            >
+                                <Flex
+                                    vertical
+                                    gap="small"
+                                    style={{ width: "100%" }}
+                                >
+                                    <Form.Item>
+                                        <Button
+                                            variant="solid"
+                                            color="primary"
+                                            loading={loading}
+                                            onClick={checkSign}
+                                        >
+                                            Получить хэш из подписанного
+                                            сообщения
+                                        </Button>
+                                    </Form.Item>
                                     <Form.Item
                                         style={{ width: "100%" }}
                                         name="sign"
