@@ -23,6 +23,7 @@ const Lab7 = () => {
     const [rsaCheckSignForm] = useForm();
     const [elgamalForm] = useForm();
     const [elGamalSignForm] = useForm();
+    const [elGamalCheckSignForm] = useForm();
 
     const [algorithm, setAlgorithm] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -211,7 +212,7 @@ const Lab7 = () => {
         }
     };
 
-    const checkSign = async () => {
+    const checkRSASign = async () => {
         try {
             setLoading(true);
             const values = await rsaCheckSignForm.validateFields();
@@ -249,6 +250,32 @@ const Lab7 = () => {
             elGamalSignForm.setFieldValue("hashCode", data.hashCode);
             elGamalSignForm.setFieldValue("a", data.a);
             elGamalSignForm.setFieldValue("b", data.b);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const checkElGamalSign = async () => {
+        try {
+            setLoading(true);
+            const values = await elGamalSignForm.validateFields();
+            const values1 = await elgamalForm.validateFields();
+            const url = "/lab7/el-gamal/check-sign";
+            const body = {
+                g: values1.a,
+                hashCode: values.hashCode,
+                y: elGamalKeys.y,
+                a: values.a,
+                b: values.b,
+                p: values1.p,
+            };
+
+            const response = await axios.post(url, body);
+            const data = response.data;
+            elGamalCheckSignForm.setFieldValue("left", data.left);
+            elGamalCheckSignForm.setFieldValue("right", data.right);
         } catch (error) {
             console.log(error);
         } finally {
@@ -479,7 +506,7 @@ const Lab7 = () => {
                                             variant="solid"
                                             color="primary"
                                             loading={loading}
-                                            onClick={checkSign}
+                                            onClick={checkRSASign}
                                         >
                                             Получить хэш из подписанного
                                             сообщения
@@ -692,8 +719,8 @@ const Lab7 = () => {
                         </Splitter.Panel>
                         <Splitter.Panel style={{ marginLeft: "20px" }}>
                             <Form
-                                form={rsaCheckSignForm}
-                                name="rsaCheckSignForm"
+                                form={elGamalCheckSignForm}
+                                name="elGamalCheckSignForm"
                             >
                                 <Flex
                                     vertical
@@ -705,24 +732,22 @@ const Lab7 = () => {
                                             variant="solid"
                                             color="primary"
                                             loading={loading}
-                                            onClick={checkSign}
+                                            onClick={checkElGamalSign}
                                         >
-                                            Получить хэш из подписанного
-                                            сообщения
+                                            Проверить подпись
                                         </Button>
                                     </Form.Item>
                                     <Form.Item
                                         style={{ width: "100%" }}
-                                        name="sign"
-                                        label="Подпись"
-                                        required
+                                        name="left"
+                                        label="Левая часть"
                                     >
-                                        <Input />
+                                        <Input readOnly />
                                     </Form.Item>
                                     <Form.Item
                                         style={{ width: "100%" }}
-                                        name="hashCode"
-                                        label="Хэш"
+                                        name="right"
+                                        label="Правая часть"
                                     >
                                         <Input readOnly />
                                     </Form.Item>
