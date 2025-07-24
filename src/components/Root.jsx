@@ -32,6 +32,10 @@ const Root = () => {
             key: "/lab7",
             label: <Link to="/lab7">Лаб №7</Link>,
         },
+        {
+            key: "/lab8",
+            label: <Link to="/lab8">Лаб №8</Link>,
+        },
     ];
 
     return (

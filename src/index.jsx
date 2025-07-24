@@ -11,6 +11,7 @@ import Lab4 from "./components/Lab4";
 import Lab5 from "./components/Lab5";
 import Lab6 from "./components/Lab6";
 import Lab7 from "./components/Lab7";
+import Lab8 from "./components/Lab8";
 
 axios.defaults.baseURL = "http://localhost:8080/api";
 
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
             { path: "/lab5", element: <Lab5 /> },
             { path: "/lab6", element: <Lab6 /> },
             { path: "/lab7", element: <Lab7 /> },
+            { path: "/lab8", element: <Lab8 /> },
         ],
     },
 ]);
