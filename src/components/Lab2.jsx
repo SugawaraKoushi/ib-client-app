@@ -104,11 +104,11 @@ const Lab2 = () => {
             return Promise.reject(new Error("Обязательное поле"));
         }
 
-        // if (value.length < 10000) {
-        //     return Promise.reject(
-        //         new Error("Длина текста должна быть не менее 10000 символов")
-        //     );
-        // }
+        if (value.length < 10000) {
+            return Promise.reject(
+                new Error("Длина текста должна быть не менее 10000 символов")
+            );
+        }
 
         const regex = /^[А-Яа-яЁё_.,]+$/;
 
