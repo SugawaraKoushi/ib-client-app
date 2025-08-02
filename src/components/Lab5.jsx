@@ -73,7 +73,7 @@ const Lab5 = () => {
 
     const handleGenerateX1 = async () => {
         const values = await keysForm.validateFields();
-        const url = "/lab4/prime-numbers/generate-prime-number";
+        const url = "/lab4/prime-numbers/generate-hex-prime-number";
         const params = {
             bits: values.bits1,
             rounds: 20,
@@ -84,7 +84,7 @@ const Lab5 = () => {
 
     const handleGenerateX2 = async () => {
         const values = await keysForm.validateFields();
-        const url = "/lab4/prime-numbers/generate-prime-number";
+        const url = "/lab4/prime-numbers/generate-hex-prime-number";
         const params = {
             bits: values.bits2,
             rounds: 20,
@@ -95,13 +95,30 @@ const Lab5 = () => {
 
     const handleGenerateN = async () => {
         const values = await keysForm.validateFields();
-        const url = "/lab4/prime-numbers/generate-prime-number";
+        const url = "/lab4/prime-numbers/generate-hex-prime-number";
         const params = {
             bits: values.bits3,
             rounds: 20,
         };
         const response = await axios.get(url, { params });
         keysForm.setFieldValue("n", response.data);
+    };
+
+    const handleGetRandomPrimitiveRoot = async () => {
+        try {
+            setLoading(true);
+            const values = await keysForm.validateFields();
+            const params = {
+                value: values.n,
+            };
+            const url = "/lab5/primitive-roots/get-random-root";
+            const response = await axios.get(url, { params });
+            keysForm.setFieldValue("g", response.data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const binaryValidate = (_, value) => {
@@ -270,15 +287,6 @@ const Lab5 = () => {
                                             style={{ width: "400px" }}
                                             name="x2"
                                             label="x2"
-                                            // rules={[
-                                            //     {
-                                            //         validator: (_, value) =>
-                                            //             decimalValidate(
-                                            //                 _,
-                                            //                 value
-                                            //             ),
-                                            //     },
-                                            // ]}
                                         >
                                             <Input />
                                         </Form.Item>
@@ -312,15 +320,6 @@ const Lab5 = () => {
                                             style={{ width: "400px" }}
                                             name="n"
                                             label="n"
-                                            // rules={[
-                                            //     {
-                                            //         validator: (_, value) =>
-                                            //             decimalValidate(
-                                            //                 _,
-                                            //                 value
-                                            //             ),
-                                            //     },
-                                            // ]}
                                         >
                                             <Input />
                                         </Form.Item>
@@ -348,19 +347,27 @@ const Lab5 = () => {
                                         </Form.Item>
                                     </Space>
                                 </Flex>
-                                <Form.Item
-                                    style={{ width: "400px" }}
-                                    name="g"
-                                    label="g"
-                                    // rules={[
-                                    //     {
-                                    //         validator: (_, value) =>
-                                    //             decimalValidate(_, value),
-                                    //     },
-                                    // ]}
-                                >
-                                    <Input />
-                                </Form.Item>
+                                <Flex gap="small">
+                                    <Form.Item
+                                        style={{ width: "400px" }}
+                                        name="g"
+                                        label="g"
+                                    >
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item>
+                                        <Button
+                                            variant="solid"
+                                            color="primary"
+                                            loading={loading}
+                                            onClick={
+                                                handleGetRandomPrimitiveRoot
+                                            }
+                                        >
+                                            Получить случайный корень
+                                        </Button>
+                                    </Form.Item>
+                                </Flex>
                                 <Form.Item>
                                     <Button
                                         color="primary"
