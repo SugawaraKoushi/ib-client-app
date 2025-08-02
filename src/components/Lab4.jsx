@@ -61,7 +61,7 @@ const Lab4 = () => {
                     };
                     break;
                 case 4:
-                    url = url.concat(`/generate-prime-number`);
+                    url = url.concat(`/generate-hex-prime-number`);
                     params = {
                         bits: values.bits,
                         rounds: values.k,
