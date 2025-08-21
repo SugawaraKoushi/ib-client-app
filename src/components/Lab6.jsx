@@ -234,7 +234,7 @@ const Lab6 = () => {
                                                 loading={loading}
                                                 onClick={handleGenerateP}
                                             >
-                                                Сгенертировать число
+                                                Сгенерировать число
                                             </Button>
                                         </Form.Item>
                                     </Space>
@@ -276,7 +276,7 @@ const Lab6 = () => {
                                                 loading={loading}
                                                 onClick={handleGenerateQ}
                                             >
-                                                Сгенертировать число
+                                                Сгенерировать число
                                             </Button>
                                         </Form.Item>
                                     </Space>
@@ -321,7 +321,7 @@ const Lab6 = () => {
                             loading={loading}
                             onClick={handleGenerateAesKey}
                         >
-                            Сгенертировать ключ
+                            Сгенерировать ключ
                         </Button>
                     </Form.Item>
                 </Flex>
